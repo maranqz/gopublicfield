@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ v* ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  GO_VERSION: ^1.20
+  GOLANGCI_LINT_VERSION: v1.54.0
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - uses: actions/checkout@v3
+      - uses: golangci/golangci-lint-action@v3
+        with:
+          version: ${{ env.GOLANGCI_LINT_VERSION }}
+          args: --timeout=5m
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - uses: actions/checkout@v3
+
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-${{ matrix.go-version }}
+
+      - name: Tests with real databases
+        run: make test.coverage
+
+      - name: Code coverage data
+        run: |
+          set -x
+          COVERAGE_TOTAL=`go tool cover -func=coverage.out | grep total | grep -Eo '[0-9]+\.[0-9]+'`
+          echo "COVERAGE_TOTAL=$COVERAGE_TOTAL" >> $GITHUB_ENV
+      - uses: jandelgado/gcov2lcov-action@v1.0.9
+        with:
+          outfile: ./coverage.lcov
+
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          path-to-lcov: ./coverage.lcov
+          github-token: ${{ secrets.GITHUB_TOKEN }}

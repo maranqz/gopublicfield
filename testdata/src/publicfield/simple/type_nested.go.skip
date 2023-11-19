@@ -1,0 +1,16 @@
+package simple
+
+import "publicfield/simple/nested"
+
+type DeclStruct nested.Struct
+type UnderlyingStruct struct {
+	nested.Struct
+}
+
+func typeNested() {
+	ds := DeclStruct{}
+	ds.Int++ // want `Field 'Int' in nested.Struct can be changes only inside nested package.`
+
+	us := UnderlyingStruct{}
+	us.Int++ // want `Field 'Int' in nested.Struct can be changes only inside nested package.`
+}
