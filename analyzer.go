@@ -5,6 +5,7 @@ import (
 	"go/ast"
 	"go/types"
 
+	"github.com/gobwas/glob"
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/inspect"
 )
@@ -18,11 +19,8 @@ func NewAnalyzer() *analysis.Analyzer {
 
 	cfg := config{}
 
-	analyzer.Flags.Var(&cfg.pkgs, "p", pkgsDesc)
-	analyzer.Flags.Var(&cfg.pkgs, "pkgs", pkgsDesc)
-
-	analyzer.Flags.BoolVar(&cfg.onlyPkgs, "op", false, onlyPkgsDesc)
-	analyzer.Flags.BoolVar(&cfg.onlyPkgs, "onlyPkgs", false, onlyPkgsDesc)
+	analyzer.Flags.Var(&cfg.packageGlobs, "packageGlobs", packageGlobsDesc)
+	analyzer.Flags.BoolVar(&cfg.onlyPackageGlobs, "onlyPackageGlobs", false, onlyPackageGlobsDesc)
 
 	analyzer.Run = run(&cfg)
 
@@ -32,14 +30,19 @@ func NewAnalyzer() *analysis.Analyzer {
 func run(cfg *config) func(pass *analysis.Pass) (interface{}, error) {
 	return func(pass *analysis.Pass) (interface{}, error) {
 		var blockedStrategy pkgsStrategy = newAnotherPkg()
-		if len(cfg.pkgs) > 0 {
+		if len(cfg.packageGlobs) > 0 {
 			defaultStrategy := blockedStrategy
-			if cfg.onlyPkgs {
+			if cfg.onlyPackageGlobs {
 				defaultStrategy = newNilPkg()
 			}
 
+			pkgGlobs, err := compileGlobs(cfg.packageGlobs.Value())
+			if err != nil {
+				return nil, err
+			}
+
 			blockedStrategy = newBlockedPkgs(
-				cfg.pkgs.Value(),
+				pkgGlobs,
 				defaultStrategy,
 			)
 		}
@@ -162,4 +165,29 @@ func (v *visiter) report(
 			structType.Obj().Name(),
 		),
 	)
+}
+
+func containsMatchGlob(globs []glob.Glob, el string) bool {
+	for _, g := range globs {
+		if g.Match(el) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func compileGlobs(globs []string) ([]glob.Glob, error) {
+	compiledGlobs := make([]glob.Glob, len(globs))
+
+	for idx, globString := range globs {
+		glob, err := glob.Compile(globString)
+		if err != nil {
+			return nil, fmt.Errorf("unable to compile globs %s: %w", glob, err)
+		}
+
+		compiledGlobs[idx] = glob
+	}
+
+	return compiledGlobs, nil
 }

@@ -1,7 +1,7 @@
 package nested
 
 import (
-	"publicfield/onlyPkgs/pkg"
+	"publicfield/onlyPackageGlobs/pkg"
 )
 
 type Struct struct {

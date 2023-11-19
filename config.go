@@ -3,8 +3,8 @@ package gopublicfield
 import "strings"
 
 type config struct {
-	pkgs     stringsFlag
-	onlyPkgs bool
+	packageGlobs     stringsFlag
+	onlyPackageGlobs bool
 }
 
 type stringsFlag []string
@@ -22,17 +22,14 @@ func (s *stringsFlag) Set(value string) error {
 func (s stringsFlag) Value() []string {
 	res := make([]string, 0, len(s))
 
-	for _, pgk := range s {
-		pgk = strings.TrimSpace(pgk)
-		pgk = strings.TrimSuffix(pgk, "/") + "/"
-
-		res = append(res, pgk)
+	for _, str := range s {
+		res = append(res, strings.TrimSpace(str))
 	}
 
 	return res
 }
 
 const (
-	pkgsDesc     = "List of packages, which should use publicfield to initiate struct."
-	onlyPkgsDesc = "Only pkg packages should use publicfield to initiate struct."
+	packageGlobsDesc     = "List of glob packages, in which public fields can be written by other packages in the same glob pattern."
+	onlyPackageGlobsDesc = "Only public fields in glob packages cannot be written by other packages."
 )

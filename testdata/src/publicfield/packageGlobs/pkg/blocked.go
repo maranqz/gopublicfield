@@ -1,6 +1,6 @@
 package pkg
 
-import "publicfield/pgks/pkg/blocked_nested"
+import "publicfield/packageGlobs/pkg/blocked_nested"
 
 type Struct struct {
 	Int int

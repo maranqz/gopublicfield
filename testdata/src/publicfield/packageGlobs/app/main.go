@@ -1,9 +1,9 @@
 package app
 
 import (
-	"publicfield/pgks/nested"
-	"publicfield/pgks/pkg"
-	"publicfield/pgks/pkg/blocked_nested"
+	"publicfield/packageGlobs/nested"
+	"publicfield/packageGlobs/pkg"
+	"publicfield/packageGlobs/pkg/blocked_nested"
 )
 
 func main() {

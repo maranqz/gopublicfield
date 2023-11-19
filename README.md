@@ -8,9 +8,9 @@
 The linter blocks the changing of public fields. Unwritable fields help to avoid validation.
 The linter is useful when:
 
-* A project is migrated to Domain Model. <!-- TODO link to Fowler -->
+* A project is migrated to [Domain Model](https://martinfowler.com/eaaCatalog/domainModel.html) from [Anemic](https://martinfowler.com/bliki/AnemicDomainModel.html).
 * Business logic should not be broken by a direct variable assigning.
-* You don't want to use snapshot pattern to protect business logic in new project.
+* You don't want to use snapshot pattern to get data from model and want to protect business logic in the project.
 
 ## Use
 
@@ -20,10 +20,9 @@ Installation
 
 ### Options
 
-- `-p`, `--pkgs` - list of packages, where struct fields should be unwritable. By default, all fields in all external
-  packages should be unwritable except local, [tests](testdata/src/publicfield/pgks).
-    - `-op`, `onlyPkgs` - only packages `pkgs` should have unwritable public
-      fields, [tests](testdata/src/publicfield/onlyPkgs).
+- `--packageGlobs` - list of glob packages, in which public fields can be written by other packages in the same glob pattern. By default, all fields in all external
+  packages should be unwritable except local, [tests](testdata/src/publicfield/packageGlobs).
+    - `--onlyPackageGlobs` - only public fields in glob packages cannot be written by other packages, [tests](testdata/src/publicfield/onlyPackageGlobs).
 
 ## Example
 
@@ -67,7 +66,7 @@ import (
 )
 
 func main() {
-	u := good.NewUser()
+	u := &good.User{}
 
 	u.Update()
 }
@@ -93,6 +92,10 @@ func (u *User) Update() {
 </tbody></table>
 
 ## TODO
+
+### False negative
+
+All examples shows in [unimplemented](testdata/src/publicfield/unimplemented) directory.
 
 ### Feature, hardly implementable and not  planned
 

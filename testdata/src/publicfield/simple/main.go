@@ -32,6 +32,7 @@ func NestedInt() {
 	n.Int >>= 1 // want `Field 'Int' in nested.Struct can be changes only inside nested package.`
 	n.Int <<= 1 // want `Field 'Int' in nested.Struct can be changes only inside nested package.`
 
+	n.Int = func() int { return 1 }() // want `Field 'Int' in nested.Struct can be changes only inside nested package.`
 }
 
 func NestedIntPtr() {

@@ -1,8 +1,8 @@
 package app
 
 import (
-	"publicfield/onlyPkgs/nested"
-	"publicfield/onlyPkgs/pkg"
+	"publicfield/onlyPackageGlobs/nested"
+	"publicfield/onlyPackageGlobs/pkg"
 )
 
 func main() {

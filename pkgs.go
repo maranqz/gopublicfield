@@ -2,7 +2,8 @@ package gopublicfield
 
 import (
 	"go/types"
-	"strings"
+
+	"github.com/gobwas/glob"
 )
 
 type pkgsStrategy interface {
@@ -54,45 +55,43 @@ func (anotherPkg) IsPkgs(
 	return currentPkg.Path() != t.Obj().Pkg().Path()
 }
 
-type pkgs struct {
-	pkgs            []string
+type blockedPkgs struct {
+	pkgs            []glob.Glob
 	defaultStrategy pkgsStrategy
 }
 
 func newBlockedPkgs(
-	pkgsSlice []string,
+	pkgs []glob.Glob,
 	defaultStrategy pkgsStrategy,
-) pkgs {
-	return pkgs{
-		pkgs:            pkgsSlice,
+) blockedPkgs {
+	return blockedPkgs{
+		pkgs:            pkgs,
 		defaultStrategy: defaultStrategy,
 	}
 }
 
-func (b pkgs) IsPkgs(
+func (b blockedPkgs) IsPkgs(
 	currentPkg *types.Package,
 	identObj types.Object,
 ) bool {
 	sourceType, _ := sourceType(identObj)
 
-	identPkgPath := sourceType.Obj().Pkg().Path() + "/"
 	currentPkgPath := currentPkg.Path() + "/"
+	isIncludedInBlocked := containsMatchGlob(b.pkgs, currentPkgPath)
 
-	for _, blockedPkg := range b.pkgs {
-		isBlocked := strings.HasPrefix(identPkgPath, blockedPkg)
-		isIncludedInBlocked := strings.HasPrefix(currentPkgPath, blockedPkg)
+	if isIncludedInBlocked {
+		return false
+	}
 
-		if isIncludedInBlocked {
-			continue
-		}
+	identPkgPath := sourceType.Obj().Pkg().Path() + "/"
+	isBlocked := containsMatchGlob(b.pkgs, identPkgPath)
 
-		if isBlocked {
-			return true
-		}
+	if isBlocked {
+		return true
+	}
 
-		if b.defaultStrategy.IsPkgs(currentPkg, identObj) {
-			return true
-		}
+	if b.defaultStrategy.IsPkgs(currentPkg, identObj) {
+		return true
 	}
 
 	return false

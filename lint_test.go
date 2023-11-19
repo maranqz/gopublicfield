@@ -21,26 +21,22 @@ func TestLinterSuite(t *testing.T) {
 		prepare func(t *testing.T, a *analysis.Analyzer)
 	}{
 		"simple": {pkgs: []string{"simple/..."}},
-		"pgks": {
-			pkgs: []string{"pgks/..."},
+		"packageGlobs": {
+			pkgs: []string{"packageGlobs/..."},
 			prepare: func(t *testing.T, a *analysis.Analyzer) {
-				if err := a.Flags.Set("pkgs", "publicfield/pgks/pkg"); err != nil {
+				if err := a.Flags.Set("packageGlobs", "publicfield/packageGlobs/pkg/**"); err != nil {
 					t.Fatal(err)
 				}
 			},
 		},
-		"onlyPkgs": {
-			pkgs: []string{"onlyPkgs/app/..."},
+		"onlyPackageGlobs": {
+			pkgs: []string{"onlyPackageGlobs/app/..."},
 			prepare: func(t *testing.T, a *analysis.Analyzer) {
-				if err := a.Flags.Set("p", "publicfield/onlyPkgs/pkg"); err != nil {
+				if err := a.Flags.Set("packageGlobs", "publicfield/onlyPackageGlobs/pkg/**"); err != nil {
 					t.Fatal(err)
 				}
 
-				if err := a.Flags.Set("op", "true"); err != nil {
-					t.Fatal(err)
-				}
-
-				if err := a.Flags.Set("onlyPkgs", "true"); err != nil {
+				if err := a.Flags.Set("onlyPackageGlobs", "true"); err != nil {
 					t.Fatal(err)
 				}
 			},
