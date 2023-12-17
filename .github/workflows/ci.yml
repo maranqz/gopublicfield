@@ -9,7 +9,7 @@ on:
 
 env:
   GO_VERSION: ^1.20
-  GOLANGCI_LINT_VERSION: v1.54.0
+  GOLANGCI_LINT_VERSION: v1.55.0
 
 jobs:
   lint:
@@ -41,20 +41,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-${{ matrix.go-version }}
 
-      - name: Tests with real databases
+      - name: Tests with coverage
         run: make test.coverage
 
-      - name: Code coverage data
-        run: |
-          set -x
-          COVERAGE_TOTAL=`go tool cover -func=coverage.out | grep total | grep -Eo '[0-9]+\.[0-9]+'`
-          echo "COVERAGE_TOTAL=$COVERAGE_TOTAL" >> $GITHUB_ENV
-      - uses: jandelgado/gcov2lcov-action@v1.0.9
-        with:
-          outfile: ./coverage.lcov
-
       - name: Coveralls
-        uses: coverallsapp/github-action@master
+        uses: coverallsapp/github-action@v2
         with:
-          path-to-lcov: ./coverage.lcov
+          format: golang
+          file: ./coverage.out
           github-token: ${{ secrets.GITHUB_TOKEN }}

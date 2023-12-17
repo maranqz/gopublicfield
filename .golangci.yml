@@ -36,6 +36,7 @@ issues:
     - path: lint_test
       linters:
         - varnamelen
+        - wrapcheck
     - linters:
         - lll
       source: "^(?: |\t)*// "

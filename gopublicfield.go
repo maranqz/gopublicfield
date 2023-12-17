@@ -1,26 +1,37 @@
 package gopublicfield
 
 import (
-	"fmt"
 	"go/ast"
 	"go/types"
 
 	"github.com/gobwas/glob"
 	"golang.org/x/tools/go/analysis"
-	"golang.org/x/tools/go/analysis/passes/inspect"
+)
+
+type config struct {
+	packageGlobs     globsFlag
+	packageGlobsOnly bool
+}
+
+const (
+	name = "gopublicfield"
+	doc  = "Blocks the changing of public fields for structures from another package."
+
+	packageGlobsDesc     = "List of glob packages, in which public fields can be written by other packages in the same glob pattern."
+	packageGlobsOnlyDesc = "Only public fields in glob packages cannot be written by other packages."
 )
 
 func NewAnalyzer() *analysis.Analyzer {
 	analyzer := &analysis.Analyzer{
 		Name:     "publicfield",
-		Doc:      "Blocks using public fields",
-		Requires: []*analysis.Analyzer{inspect.Analyzer},
+		Doc:      doc,
+		Requires: []*analysis.Analyzer{},
 	}
 
 	cfg := config{}
 
 	analyzer.Flags.Var(&cfg.packageGlobs, "packageGlobs", packageGlobsDesc)
-	analyzer.Flags.BoolVar(&cfg.onlyPackageGlobs, "onlyPackageGlobs", false, onlyPackageGlobsDesc)
+	analyzer.Flags.BoolVar(&cfg.packageGlobsOnly, "packageGlobsOnly", false, packageGlobsOnlyDesc)
 
 	analyzer.Run = run(&cfg)
 
@@ -30,15 +41,12 @@ func NewAnalyzer() *analysis.Analyzer {
 func run(cfg *config) func(pass *analysis.Pass) (interface{}, error) {
 	return func(pass *analysis.Pass) (interface{}, error) {
 		var blockedStrategy pkgsStrategy = newAnotherPkg()
-		if len(cfg.packageGlobs) > 0 {
-			defaultStrategy := blockedStrategy
-			if cfg.onlyPackageGlobs {
-				defaultStrategy = newNilPkg()
-			}
 
-			pkgGlobs, err := compileGlobs(cfg.packageGlobs.Value())
-			if err != nil {
-				return nil, err
+		pkgGlobs := cfg.packageGlobs.Value()
+		if len(pkgGlobs) > 0 {
+			defaultStrategy := blockedStrategy
+			if cfg.packageGlobsOnly {
+				defaultStrategy = newNilPkg()
 			}
 
 			blockedStrategy = newBlockedPkgs(
@@ -158,12 +166,10 @@ func (v *visiter) report(
 
 	v.pass.Reportf(
 		node.Pos(),
-		fmt.Sprintf(
-			`Field '%s' in %s.%s can be changes only inside nested package.`,
-			fieldObj.Name(),
-			structType.Obj().Pkg().Name(),
-			structType.Obj().Name(),
-		),
+		`Field '%s' in %s.%s can be changed only inside nested package.`,
+		fieldObj.Name(),
+		structType.Obj().Pkg().Name(),
+		structType.Obj().Name(),
 	)
 }
 
@@ -175,19 +181,4 @@ func containsMatchGlob(globs []glob.Glob, el string) bool {
 	}
 
 	return false
-}
-
-func compileGlobs(globs []string) ([]glob.Glob, error) {
-	compiledGlobs := make([]glob.Glob, len(globs))
-
-	for idx, globString := range globs {
-		glob, err := glob.Compile(globString)
-		if err != nil {
-			return nil, fmt.Errorf("unable to compile globs %s: %w", glob, err)
-		}
-
-		compiledGlobs[idx] = glob
-	}
-
-	return compiledGlobs, nil
 }

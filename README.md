@@ -22,7 +22,7 @@ Installation
 
 - `--packageGlobs` - list of glob packages, in which public fields can be written by other packages in the same glob pattern. By default, all fields in all external
   packages should be unwritable except local, [tests](testdata/src/publicfield/packageGlobs).
-    - `--onlyPackageGlobs` - only public fields in glob packages cannot be written by other packages, [tests](testdata/src/publicfield/onlyPackageGlobs).
+    - `--packageGlobsOnly` - only public fields in glob packages cannot be written by other packages, [tests](testdata/src/publicfield/packageGlobsOnly).
 
 ## Example
 
@@ -41,7 +41,7 @@ import (
 func main() {
 	u := &bad.User{}
 
-	u.UpdatedAt = time.Now() // Field 'ID' in bad.User can be changes only inside nested package.`
+	u.UpdatedAt = time.Now() // Field 'ID' in bad.User can be changed only inside nested package.`
 }
 
 ```
@@ -97,7 +97,7 @@ func (u *User) Update() {
 
 All examples shows in [unimplemented](testdata/src/publicfield/unimplemented) directory.
 
-### Feature, hardly implementable and not  planned
+### Feature, hardly implementable and not planned
 
 1. Type assertion, type declaration and type underlying, [tests](testdata/src/publicfield/default/type_nested.go.skip).
 2. Unreadable fields.

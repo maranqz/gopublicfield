@@ -6,5 +6,5 @@ type AliasStruct = nested.Struct
 
 func typeNested() {
 	as := AliasStruct{}
-	as.Int++ // want `Field 'Int' in nested.Struct can be changes only inside nested package.`
+	as.Int++ // want `Field 'Int' in nested.Struct can be changed only inside nested package.`
 }

@@ -18,27 +18,23 @@ func TestLinterSuite(t *testing.T) {
 
 	tests := map[string]struct {
 		pkgs    []string
-		prepare func(t *testing.T, a *analysis.Analyzer)
+		prepare func(t *testing.T, a *analysis.Analyzer) error
 	}{
 		"simple": {pkgs: []string{"simple/..."}},
 		"packageGlobs": {
 			pkgs: []string{"packageGlobs/..."},
-			prepare: func(t *testing.T, a *analysis.Analyzer) {
-				if err := a.Flags.Set("packageGlobs", "publicfield/packageGlobs/pkg/**"); err != nil {
-					t.Fatal(err)
-				}
+			prepare: func(t *testing.T, a *analysis.Analyzer) error {
+				return a.Flags.Set("packageGlobs", "publicfield/packageGlobs/pkg/**")
 			},
 		},
-		"onlyPackageGlobs": {
-			pkgs: []string{"onlyPackageGlobs/app/..."},
-			prepare: func(t *testing.T, a *analysis.Analyzer) {
-				if err := a.Flags.Set("packageGlobs", "publicfield/onlyPackageGlobs/pkg/**"); err != nil {
-					t.Fatal(err)
+		"packageGlobsOnly": {
+			pkgs: []string{"packageGlobsOnly/app/..."},
+			prepare: func(t *testing.T, a *analysis.Analyzer) error {
+				if err := a.Flags.Set("packageGlobs", "publicfield/packageGlobsOnly/pkg/**"); err != nil {
+					return err
 				}
 
-				if err := a.Flags.Set("onlyPackageGlobs", "true"); err != nil {
-					t.Fatal(err)
-				}
+				return a.Flags.Set("packageGlobsOnly", "true")
 			},
 		},
 	}
@@ -57,7 +53,10 @@ func TestLinterSuite(t *testing.T) {
 			analyzer := gopublicfield.NewAnalyzer()
 
 			if tt.prepare != nil {
-				tt.prepare(t, analyzer)
+				err := tt.prepare(t, analyzer)
+				if err != nil {
+					t.Fatal(err)
+				}
 			}
 
 			analysistest.Run(t, TestdataDir(),

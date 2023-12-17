@@ -9,8 +9,8 @@ type UnderlyingStruct struct {
 
 func typeNested() {
 	ds := DeclStruct{}
-	ds.Int++ // want `Field 'Int' in nested.Struct can be changes only inside nested package.`
+	ds.Int++ // want `Field 'Int' in nested.Struct can be changed only inside nested package.`
 
 	us := UnderlyingStruct{}
-	us.Int++ // want `Field 'Int' in nested.Struct can be changes only inside nested package.`
+	us.Int++ // want `Field 'Int' in nested.Struct can be changed only inside nested package.`
 }

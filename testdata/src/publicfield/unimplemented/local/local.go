@@ -20,7 +20,6 @@ func NewStruct() (Struct, int, error) {
 
 func (s *Struct) UpdatePtr() {
 	s.Int = 1
-
 }
 
 func (s Struct) Update() {
@@ -28,11 +27,11 @@ func (s Struct) Update() {
 }
 
 func UpdatePtr(s *Struct) {
-	s.Int = 1 // want `Field 'Int' in local.Struct can be changes only inside Factory or Struct methods.`
+	s.Int = 1 // want `Field 'Int' in local.Struct can be changed only inside Factory or Struct methods.`
 }
 
 func Update(s Struct) Struct {
-	s.Int = 1 // want `Field 'Int' in local.Struct can be changes only inside Factory or Struct methods.`
+	s.Int = 1 // want `Field 'Int' in local.Struct can be changed only inside Factory or Struct methods.`
 
 	return s
 }
