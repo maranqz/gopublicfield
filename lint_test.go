@@ -5,10 +5,9 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/maranqz/gopublicfield"
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/analysistest"
-
-	"github.com/maranqz/gopublicfield"
 )
 
 func TestLinterSuite(t *testing.T) {
@@ -23,13 +22,13 @@ func TestLinterSuite(t *testing.T) {
 		"simple": {pkgs: []string{"simple/..."}},
 		"packageGlobs": {
 			pkgs: []string{"packageGlobs/..."},
-			prepare: func(t *testing.T, a *analysis.Analyzer) error {
+			prepare: func(_ *testing.T, a *analysis.Analyzer) error {
 				return a.Flags.Set("packageGlobs", "publicfield/packageGlobs/pkg/**")
 			},
 		},
 		"packageGlobsOnly": {
 			pkgs: []string{"packageGlobsOnly/app/..."},
-			prepare: func(t *testing.T, a *analysis.Analyzer) error {
+			prepare: func(_ *testing.T, a *analysis.Analyzer) error {
 				if err := a.Flags.Set("packageGlobs", "publicfield/packageGlobsOnly/pkg/**"); err != nil {
 					return err
 				}
@@ -39,8 +38,6 @@ func TestLinterSuite(t *testing.T) {
 		},
 	}
 	for name, tt := range tests {
-		tt := tt
-
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 

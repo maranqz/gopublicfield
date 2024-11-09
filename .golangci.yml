@@ -7,31 +7,17 @@ linters-settings:
     ignore-names:
       - v
       - ok
-  gci:
-    local-prefixes: github.com/maranqz/gopublicfield
 
 linters:
   enable-all: true
   disable:
-    - maligned
-    - deadcode
-    - golint
-    - scopelint
-    - varcheck
-    - structcheck
-    - nosnakecase
-    - exhaustivestruct
-    - ifshort
     - exhaustruct
     - depguard
-    - interfacer
     - thelper
 
-run:
-  skip-dirs:
-    - testdata
-
 issues:
+  exclude-dirs:
+    - testdata
   exclude-rules:
     - path: lint_test
       linters:

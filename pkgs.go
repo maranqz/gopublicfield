@@ -20,6 +20,13 @@ func sourceType(obj types.Object) (*types.Named, bool) {
 		ptr, ok = objType.(*types.Pointer)
 	}
 
+	alias, ok := objType.(*types.Alias)
+	for ok {
+		objType = types.Unalias(alias)
+
+		alias, ok = objType.(*types.Alias)
+	}
+
 	objType, ok = objType.(*types.Named)
 	if !ok {
 		return nil, false
